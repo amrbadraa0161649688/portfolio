@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amr Badr — Cloud Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#05080f;--surface:#080d1c;--raised:#0c1428;--card:#101930;
+  --border:rgba(255,255,255,0.06);--border-hi:rgba(255,255,255,0.15);
+  --c1:#00e5ff;--c2:#2979ff;--c3:#651fff;--c4:#f50057;
+  --gold:#ffc400;
+  --text:#dce8f5;--muted:#5a7a9a;--dim:#2a3a55;
+  --f-head:'Black Ops One',sans-serif;
+  --f-body:'DM Sans',sans-serif;
+  --f-mono:'Fira Code',monospace;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--ink);color:var(--text);font-family:var(--f-body);overflow-x:hidden;cursor:none;}
+body::before{content:'';position:fixed;inset:0;z-index:1000;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");opacity:0.028;mix-blend-mode:overlay;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--ink);}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--c1),var(--c3));}
+#cur-dot{position:fixed;width:6px;height:6px;background:var(--c1);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;}
+#cur-ring{position:fixed;width:38px;height:38px;border:1.5px solid rgba(0,229,255,0.45);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s;}
+#cur-ring.hover{width:58px;height:58px;border-color:rgba(245,0,87,0.55);}
+#gl{position:fixed;inset:0;z-index:0;opacity:.5;}
+#progress{position:fixed;top:0;left:0;height:2px;z-index:200;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4));width:0%;transition:width .1s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 5rem;transition:all .4s;}
+nav.scrolled{background:rgba(5,8,15,0.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:1rem 5rem;}
+.nav-logo{font-family:var(--f-head);font-size:1.35rem;letter-spacing:.12em;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.nav-links{display:flex;gap:3rem;list-style:none;}
+.nav-links a{font-family:var(--f-mono);font-size:.63rem;letter-spacing:.18em;color:var(--muted);text-decoration:none;text-transform:uppercase;transition:color .3s;position:relative;padding-bottom:4px;}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--c1);transition:width .3s;}
+.nav-links a:hover{color:var(--c1);}
+.nav-links a:hover::after{width:100%;}
+.nav-btn{font-family:var(--f-mono);font-size:.63rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;color:var(--ink);background:linear-gradient(135deg,var(--c1),var(--c2));padding:.6rem 1.6rem;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:transform .3s,box-shadow .3s;}
+.nav-btn:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(0,229,255,0.35);}
+#hero{min-height:100vh;display:flex;align-items:center;padding:0 5rem;position:relative;z-index:10;overflow:hidden;}
+.hero-left{flex:1;position:relative;z-index:2;}
+.hero-eyebrow{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.28em;color:var(--c1);text-transform:uppercase;display:inline-flex;align-items:center;gap:.8rem;margin-bottom:1.8rem;opacity:0;animation:slideUp .6s .3s forwards;}
+.hero-eyebrow::before{content:'';width:32px;height:1px;background:var(--c1);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#00e676;box-shadow:0 0 8px #00e676;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hero-name{font-family:var(--f-head);font-size:clamp(4.5rem,11vw,11rem);line-height:.88;letter-spacing:.02em;opacity:0;animation:slideUp .7s .45s forwards;}
+.hero-name .l1{display:block;color:var(--text);}
+.hero-name .l2{display:block;background:linear-gradient(135deg,var(--c1) 0%,var(--c2) 40%,var(--c3) 80%,var(--c4) 100%);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradFlow 5s ease infinite 1.2s;}
+@keyframes gradFlow{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+.hero-terminal{margin-top:2rem;font-family:var(--f-mono);font-size:.84rem;color:var(--muted);line-height:1.9;opacity:0;animation:slideUp .7s .7s forwards;}
+.hero-terminal .prompt{color:var(--c1);}
+.cursor-blink{display:inline-block;width:8px;height:1em;background:var(--c1);animation:curBlink .8s infinite;vertical-align:text-bottom;}
+@keyframes curBlink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+.hero-actions{display:flex;gap:1rem;margin-top:2.5rem;flex-wrap:wrap;opacity:0;animation:slideUp .7s .95s forwards;}
+.mag-btn{position:relative;display:inline-flex;align-items:center;gap:.7rem;padding:1rem 2.4rem;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:transform .2s,box-shadow .3s;}
+.mag-btn-primary{background:linear-gradient(135deg,var(--c1),var(--c2));color:var(--ink);font-weight:600;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));}
+.mag-btn-primary:hover{box-shadow:0 20px 50px rgba(0,229,255,0.4);}
+.mag-btn-ghost{border:1px solid var(--border-hi);color:var(--text);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));}
+.mag-btn-ghost:hover{border-color:var(--c1);color:var(--c1);}
+.hero-metrics{display:flex;gap:0;margin-top:4rem;opacity:0;animation:slideUp .7s 1.1s forwards;}
+.metric{padding:1.2rem 2.5rem;border:1px solid var(--border);border-right:none;position:relative;overflow:hidden;transition:border-color .3s;}
+.metric:last-child{border-right:1px solid var(--border);}
+.metric::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,229,255,0.04),transparent);opacity:0;transition:opacity .3s;}
+.metric:hover{border-color:var(--c1);}
+.metric:hover::before{opacity:1;}
+.metric-num{font-family:var(--f-head);font-size:2.6rem;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.metric-label{font-family:var(--f-mono);font-size:.56rem;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:.4rem;}
+.hero-right{width:420px;flex-shrink:0;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;opacity:0;animation:fadeIn .8s 1.2s forwards;}
+.scene{width:220px;height:220px;perspective:600px;}
+.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:rotateCube 14s linear infinite;}
+@keyframes rotateCube{from{transform:rotateX(20deg) rotateY(0);}to{transform:rotateX(20deg) rotateY(360deg);}}
+.face{position:absolute;width:220px;height:220px;display:flex;align-items:center;justify-content:center;font-family:var(--f-head);font-size:1.3rem;letter-spacing:.12em;border:1px solid rgba(0,229,255,0.22);background:rgba(8,13,28,0.72);backdrop-filter:blur(8px);color:var(--c1);}
+.face-front{transform:translateZ(110px);}
+.face-back{transform:rotateY(180deg) translateZ(110px);}
+.face-right{transform:rotateY(90deg) translateZ(110px);}
+.face-left{transform:rotateY(-90deg) translateZ(110px);}
+.face-top{transform:rotateX(90deg) translateZ(110px);font-size:.9rem;}
+.face-bot{transform:rotateX(-90deg) translateZ(110px);font-size:.9rem;}
+.cube-glow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,100,255,0.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulseGlow 3s ease-in-out infinite;}
+@keyframes pulseGlow{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.2);}}
+section{padding:9rem 5rem;position:relative;z-index:10;}
+.sec-label{font-family:var(--f-mono);font-size:.6rem;letter-spacing:.3em;color:var(--c3);text-transform:uppercase;display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;}
+.sec-label::before{content:'__';color:var(--c1);}
+.sec-title{font-family:var(--f-head);font-size:clamp(2.2rem,4.5vw,4rem);line-height:.95;letter-spacing:.04em;margin-bottom:.8rem;}
+.sec-title .hi{background:linear-gradient(90deg,var(--c1),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.sec-bar{width:48px;height:3px;background:linear-gradient(90deg,var(--c1),var(--c3));margin-bottom:4rem;}
+#about{background:linear-gradient(180deg,var(--ink) 0%,var(--surface) 100%);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;}
+.about-text p{color:var(--muted);line-height:1.9;font-size:.95rem;margin-bottom:1.2rem;}
+.about-text p strong{color:var(--text);font-weight:600;}
+.about-badges{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.5rem;}
+.badge{font-family:var(--f-mono);font-size:.58rem;letter-spacing:.12em;padding:.28rem .8rem;text-transform:uppercase;border:1px solid var(--border-hi);color:var(--muted);transition:all .2s;}
+.badge:hover{border-color:var(--c1);color:var(--c1);background:rgba(0,229,255,0.05);}
+.about-card{background:var(--card);border:1px solid var(--border);padding:2rem;position:relative;overflow:hidden;}
+.about-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4));}
+.about-card-title{font-family:var(--f-mono);font-size:.58rem;letter-spacing:.2em;color:var(--c1);text-transform:uppercase;margin-bottom:1.2rem;}
+.specialty-list{list-style:none;}
+.specialty-list li{padding:.68rem 0;border-bottom:1px solid var(--border);font-size:.88rem;color:var(--muted);display:flex;align-items:center;gap:.8rem;transition:color .3s;}
+.specialty-list li:last-child{border-bottom:none;}
+.specialty-list li:hover{color:var(--text);}
+.specialty-list li::before{content:'-->';color:var(--c1);font-family:var(--f-mono);font-size:.7rem;}
+#skills{background:var(--surface);}
+.skills-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
+.skill-block{background:var(--card);padding:2rem 1.8rem;position:relative;overflow:hidden;transition:all .35s;}
+.skill-block::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--c1),var(--c3));transition:width .4s;}
+.skill-block:hover::after{width:100%;}
+.skill-block:hover{background:var(--raised);}
+.skill-num{font-family:var(--f-head);font-size:3.5rem;line-height:1;color:rgba(0,229,255,0.06);position:absolute;top:.5rem;right:1rem;transition:color .3s;}
+.skill-block:hover .skill-num{color:rgba(0,229,255,0.14);}
+.skill-icon{font-size:1.6rem;margin-bottom:1rem;}
+.skill-name{font-family:var(--f-mono);font-size:.6rem;letter-spacing:.18em;color:var(--c1);text-transform:uppercase;margin-bottom:1rem;}
+.skill-pills{display:flex;flex-direction:column;gap:.35rem;}
+.pill{font-family:var(--f-mono);font-size:.6rem;color:var(--muted);padding:.25rem .6rem;background:rgba(255,255,255,0.025);border-left:2px solid var(--dim);transition:all .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.skill-block:hover .pill{border-left-color:rgba(0,229,255,0.3);color:var(--text);}
+#experience{background:var(--ink);}
+.exp-wrap{display:grid;grid-template-columns:260px 1fr;gap:0;}
+.exp-nav{border-right:1px solid var(--border);padding-right:3rem;}
+.exp-nav-item{padding:1.2rem 1.5rem;cursor:none;border-left:2px solid transparent;transition:all .3s;}
+.exp-nav-item.active{border-left-color:var(--c1);background:rgba(0,229,255,0.04);}
+.exp-nav-item:hover:not(.active){border-left-color:var(--dim);background:rgba(255,255,255,0.02);}
+.exp-nav-company{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;color:var(--text);text-transform:uppercase;}
+.exp-nav-period{font-family:var(--f-mono);font-size:.56rem;color:var(--muted);margin-top:.3rem;}
+.exp-content{padding-left:4rem;}
+.exp-panel{display:none;}
+.exp-panel.active{display:block;animation:panelIn .4s ease;}
+@keyframes panelIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+.exp-role-title{font-family:var(--f-head);font-size:2.2rem;letter-spacing:.04em;color:var(--text);margin-bottom:.3rem;}
+.exp-co-name{font-family:var(--f-mono);font-size:.76rem;color:var(--gold);display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;}
+.exp-period-tag{font-family:var(--f-mono);font-size:.58rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:1.8rem;display:flex;align-items:center;gap:.6rem;}
+.exp-period-tag::before{content:'';width:20px;height:1px;background:var(--muted);}
+.exp-list{list-style:none;}
+.exp-list li{padding:.5rem 0 .5rem 1.5rem;color:var(--muted);font-size:.87rem;line-height:1.75;position:relative;border-bottom:1px solid rgba(255,255,255,0.03);transition:color .2s;}
+.exp-list li:hover{color:var(--text);}
+.exp-list li::before{content:'>';position:absolute;left:0;color:var(--c1);font-family:var(--f-mono);font-size:.75rem;top:.55rem;}
+#projects{background:var(--surface);}
+.projects-filter{display:flex;gap:.5rem;margin-bottom:3rem;flex-wrap:wrap;}
+.filter-btn{font-family:var(--f-mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;padding:.4rem 1rem;border:1px solid var(--border);color:var(--muted);cursor:none;transition:all .2s;background:none;}
+.filter-btn.active,.filter-btn:hover{border-color:var(--c1);color:var(--c1);background:rgba(0,229,255,0.05);}
+.projects-masonry{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.proj-card{background:var(--card);border:1px solid var(--border);padding:2rem;position:relative;overflow:hidden;transition:all .4s;}
+.proj-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,229,255,0.06) 0%,transparent 60%);opacity:0;transition:opacity .3s;}
+.proj-card:hover::before{opacity:1;}
+.proj-card:hover{border-color:rgba(0,229,255,0.3);transform:translateY(-6px);box-shadow:0 30px 70px rgba(0,0,0,0.5);}
+.proj-corner{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 26px 26px 0;border-color:transparent var(--c1) transparent transparent;transition:border-width .3s;}
+.proj-card:hover .proj-corner{border-width:0 34px 34px 0;}
+.proj-cat{font-family:var(--f-mono);font-size:.53rem;letter-spacing:.2em;text-transform:uppercase;padding:.2rem .7rem;display:inline-block;margin-bottom:1.2rem;border-radius:2px;}
+.cat-gov{background:rgba(255,196,0,0.1);color:var(--gold);border:1px solid rgba(255,196,0,.25);}
+.cat-fin{background:rgba(0,229,255,0.08);color:var(--c1);border:1px solid rgba(0,229,255,.2);}
+.cat-platform{background:rgba(101,31,255,0.1);color:var(--c3);border:1px solid rgba(101,31,255,.25);}
+.cat-ai{background:rgba(245,0,87,0.1);color:var(--c4);border:1px solid rgba(245,0,87,.25);}
+.proj-name{font-family:var(--f-head);font-size:1.7rem;letter-spacing:.04em;margin-bottom:.25rem;}
+.proj-full{font-family:var(--f-mono);font-size:.6rem;color:var(--muted);margin-bottom:1rem;}
+.proj-desc{font-size:.82rem;color:var(--muted);line-height:1.75;}
+.proj-stack{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1.2rem;}
+.proj-tag{font-family:var(--f-mono);font-size:.53rem;letter-spacing:.08em;padding:.18rem .5rem;background:rgba(255,255,255,0.03);border:1px solid var(--dim);color:var(--dim);transition:all .2s;}
+.proj-card:hover .proj-tag{border-color:rgba(0,229,255,0.2);color:var(--muted);}
+.proj-card.hidden{display:none;}
+#certifications{background:var(--ink);}
+.certs-track{display:flex;gap:1.5rem;overflow-x:auto;padding-bottom:1rem;scrollbar-width:none;}
+.certs-track::-webkit-scrollbar{display:none;}
+.cert-tile{min-width:255px;background:var(--card);border:1px solid var(--border);padding:2rem;flex-shrink:0;position:relative;overflow:hidden;transition:all .35s;}
+.cert-tile::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,229,255,0.04),rgba(101,31,255,0.04));opacity:0;transition:opacity .3s;}
+.cert-tile:hover{border-color:var(--c1);transform:translateY(-4px);}
+.cert-tile:hover::before{opacity:1;}
+.cert-tile-num{font-family:var(--f-head);font-size:4rem;color:rgba(0,229,255,0.06);position:absolute;top:0;right:1rem;line-height:1;transition:color .3s;}
+.cert-tile:hover .cert-tile-num{color:rgba(0,229,255,0.12);}
+.cert-tile-icon{font-size:1.8rem;margin-bottom:1rem;}
+.cert-tile-name{font-weight:600;font-size:.9rem;color:var(--text);line-height:1.3;margin-bottom:.5rem;}
+.cert-tile-issuer{font-family:var(--f-mono);font-size:.58rem;letter-spacing:.1em;color:var(--muted);}
+.cert-tile-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,var(--c1),var(--c3));width:0;transition:width .5s;}
+.cert-tile:hover .cert-tile-bar{width:100%;}
+#contact{background:linear-gradient(180deg,var(--surface) 0%,var(--ink) 100%);overflow:hidden;position:relative;}
+#contact::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,100,255,0.07) 0%,transparent 70%);pointer-events:none;}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start;}
+.contact-headline{font-family:var(--f-head);font-size:clamp(2rem,4vw,3.5rem);line-height:1;letter-spacing:.04em;margin-bottom:1.5rem;}
+.contact-headline .hi{background:linear-gradient(90deg,var(--c4),var(--c3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.contact-sub{color:var(--muted);line-height:1.8;font-size:.9rem;margin-bottom:2.5rem;}
+.contact-links{display:flex;flex-direction:column;gap:1rem;}
+.contact-link{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:1rem;text-decoration:none;padding:1rem 1.2rem;border:1px solid var(--border);transition:all .3s;position:relative;overflow:hidden;}
+.contact-link::after{content:'';position:absolute;left:0;bottom:0;top:0;width:3px;background:linear-gradient(var(--c1),var(--c3));transform:scaleY(0);transform-origin:bottom;transition:transform .3s;}
+.contact-link:hover{border-color:var(--border-hi);transform:translateX(6px);}
+.contact-link:hover::after{transform:scaleY(1);}
+.cl-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);font-size:1rem;transition:background .3s;}
+.contact-link:hover .cl-icon{background:rgba(0,229,255,0.1);}
+.cl-label{font-family:var(--f-mono);font-size:.58rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:.2rem;}
+.cl-value{font-size:.85rem;color:var(--text);}
+.contact-form{display:flex;flex-direction:column;gap:1.2rem;}
+.form-field{position:relative;}
+.form-field label{font-family:var(--f-mono);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.6rem;transition:color .3s;}
+.form-field:focus-within label{color:var(--c1);}
+.form-field input,.form-field textarea{width:100%;background:var(--card);border:1px solid var(--border);padding:.9rem 1.2rem;color:var(--text);font-family:var(--f-body);font-size:.9rem;outline:none;transition:border-color .3s,box-shadow .3s;resize:none;-webkit-appearance:none;}
+.form-field input::placeholder,.form-field textarea::placeholder{color:var(--dim);font-family:var(--f-mono);font-size:.73rem;}
+.form-field input:focus,.form-field textarea:focus{border-color:var(--c1);box-shadow:0 0 0 3px rgba(0,229,255,0.06);}
+.form-field textarea{height:120px;}
+.form-line{position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--c1);transition:width .4s;}
+.form-field input:focus~.form-line,.form-field textarea:focus~.form-line{width:100%;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
+.submit-btn{display:inline-flex;align-items:center;gap:.8rem;align-self:flex-start;padding:1rem 2.5rem;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);font-weight:600;background:linear-gradient(135deg,var(--c1),var(--c2));border:none;cursor:none;transition:all .3s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));}
+.submit-btn:hover{box-shadow:0 20px 50px rgba(0,229,255,0.35);transform:translateY(-2px);}
+.submit-btn.sent{background:linear-gradient(135deg,#00e676,#00c853);color:white;}
+footer{background:var(--ink);border-top:1px solid var(--border);padding:2.5rem 5rem;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:2rem;}
+.footer-logo{font-family:var(--f-head);font-size:1.1rem;letter-spacing:.12em;color:var(--dim);}
+.footer-mid{text-align:center;}
+.footer-mid span{font-family:var(--f-mono);font-size:.56rem;color:var(--dim);letter-spacing:.15em;}
+.footer-right{text-align:right;font-family:var(--f-mono);font-size:.56rem;color:var(--dim);}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s,transform .7s;}
+.reveal.vis{opacity:1;transform:translateY(0);}
+.reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .7s,transform .7s;}
+.reveal-left.vis{opacity:1;transform:translateX(0);}
+.reveal-right{opacity:0;transform:translateX(30px);transition:opacity .7s,transform .7s;}
+.reveal-right.vis{opacity:1;transform:translateX(0);}
+@media(max-width:1100px){.skills-wrap{grid-template-columns:repeat(2,1fr);}.projects-masonry{grid-template-columns:repeat(2,1fr);}.about-grid,.contact-grid{grid-template-columns:1fr;gap:3rem;}.exp-wrap{grid-template-columns:1fr;}.exp-nav{border-right:none;border-bottom:1px solid var(--border);padding-right:0;padding-bottom:1.5rem;margin-bottom:2rem;display:flex;flex-wrap:wrap;gap:.5rem;}.exp-nav-item{border-left:none;border-bottom:2px solid transparent;padding:.8rem 1rem;}.exp-nav-item.active{border-bottom-color:var(--c1);border-left-color:transparent;}.exp-content{padding-left:0;}.hero-right{display:none;}}
+@media(max-width:768px){nav,nav.scrolled{padding:1rem 1.5rem;}.nav-links{display:none;}section,#hero{padding:5rem 1.5rem;}footer{padding:2rem 1.5rem;grid-template-columns:1fr;text-align:center;}.footer-right{text-align:center;}.projects-masonry,.skills-wrap{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}.hero-metrics{flex-wrap:wrap;}.metric{border-right:1px solid var(--border);}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+<div id="progress"></div>
+
+<nav id="nav">
+  <div class="nav-logo">AMR BADR</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#certifications">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-btn">Open to Work</a>
+</nav>
+
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow"><span class="status-dot"></span>Available for GCC Opportunities</div>
+    <h1 class="hero-name"><span class="l1">AMR</span><span class="l2">BADR</span></h1>
+    <div class="hero-terminal">
+      <div><span class="prompt">cloud@gcc:~$</span> <span id="typed"></span><span class="cursor-blink"></span></div>
+      <div id="term-output" style="margin-top:.4rem;min-height:1.5em;font-size:.76rem;"></div>
+    </div>
+    <div class="hero-actions">
+      <a href="#projects" class="mag-btn mag-btn-primary">View Projects &rarr;</a>
+      <a href="#contact" class="mag-btn mag-btn-ghost">Let's Talk</a>
+    </div>
+    <div class="hero-metrics">
+      <div class="metric"><div class="metric-num" data-count="6" data-suffix="+">0+</div><div class="metric-label">Years Active</div></div>
+      <div class="metric"><div class="metric-num" data-count="12" data-suffix="+">0+</div><div class="metric-label">Enterprise Projects</div></div>
+      <div class="metric"><div class="metric-num" data-count="5" data-suffix="">0</div><div class="metric-label">Certifications</div></div>
+      <div class="metric"><div class="metric-num" data-count="99" data-suffix=".9%">0</div><div class="metric-label">Platform Uptime</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div style="position:relative;">
+      <div class="cube-glow"></div>
+      <div class="scene">
+        <div class="cube">
+          <div class="face face-front">AKS</div>
+          <div class="face face-back">EKS</div>
+          <div class="face face-right">K8s</div>
+          <div class="face face-left">IaC</div>
+          <div class="face face-top">DevSecOps</div>
+          <div class="face face-bot">GitOps</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="sec-label">Profile</div>
+  <h2 class="sec-title">About <span class="hi">Me</span></h2>
+  <div class="sec-bar"></div>
+  <div class="about-grid">
+    <div class="about-text reveal-left">
+      <p>I'm a <strong>Senior DevOps Engineer and Cloud Solutions Architect</strong> with 6+ years designing, securing, and operating enterprise-grade infrastructure for governments and financial institutions across the UAE and GCC.</p>
+      <p>My work spans the full infrastructure lifecycle &mdash; from zero-trust network architecture and Kubernetes platform engineering to DevSecOps pipeline design and disaster recovery planning. I specialize in environments where <strong>security, compliance, and five-nines availability</strong> are non-negotiable.</p>
+      <p>Clients include <strong>DGE (Digital Government Entity, UAE)</strong>, <strong>Abu Dhabi Global Market</strong>, <strong>Qatar Financial Centre Regulatory Authority</strong>, and the <strong>Department of Municipalities &amp; Transport (UAE)</strong>.</p>
+      <div class="about-badges">
+        <span class="badge">UAE Gov Projects</span><span class="badge">Multi-Cloud</span><span class="badge">Zero Downtime Migrations</span><span class="badge">CIS Compliance</span><span class="badge">Financial Grade Infra</span><span class="badge">Open to Relocation</span>
+      </div>
+    </div>
+    <div class="reveal-right">
+      <div class="about-card">
+        <div class="about-card-title">// Core Specialisations</div>
+        <ul class="specialty-list">
+          <li>Multi-Cloud Architecture (Azure + AWS)</li>
+          <li>Kubernetes Platform Engineering</li>
+          <li>DevSecOps Pipeline Design</li>
+          <li>Zero-Trust Network Segmentation</li>
+          <li>GitOps &amp; Release Engineering</li>
+          <li>Disaster Recovery &amp; Business Continuity</li>
+          <li>Compliance Automation (CIS, RBAC, Policy)</li>
+          <li>GPU &amp; AI Infrastructure</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="sec-label">Technical Stack</div>
+  <h2 class="sec-title">Core <span class="hi">Skills</span></h2>
+  <div class="sec-bar"></div>
+  <div class="skills-wrap">
+    <div class="skill-block reveal"><div class="skill-num">01</div><div class="skill-icon">&#9729;</div><div class="skill-name">Cloud Platforms</div><div class="skill-pills"><span class="pill">Microsoft Azure</span><span class="pill">Amazon Web Services</span><span class="pill">AKS / EKS</span><span class="pill">Azure AD / AWS IAM</span><span class="pill">Azure Policy</span></div></div>
+    <div class="skill-block reveal"><div class="skill-num">02</div><div class="skill-icon">&#9096;</div><div class="skill-name">Orchestration</div><div class="skill-pills"><span class="pill">Kubernetes</span><span class="pill">Docker</span><span class="pill">Helm</span><span class="pill">ArgoCD (GitOps)</span><span class="pill">HPA / Cluster Autoscaler</span></div></div>
+    <div class="skill-block reveal"><div class="skill-num">03</div><div class="skill-icon">&#128736;</div><div class="skill-name">Infrastructure as Code</div><div class="skill-pills"><span class="pill">Terraform (Modular)</span><span class="pill">Ansible</span><span class="pill">Multi-env Design</span></div></div>
+    <div class="skill-block reveal"><div class="skill-num">04</div><div class="skill-icon">&#9851;</div><div class="skill-name">CI/CD</div><div class="skill-pills"><span class="pill">Azure DevOps</span><span class="pill">Jenkins</span><span class="pill">GitLab CI/CD</span><span class="pill">ArgoCD</span></div></div>
+    <div class="skill-block reveal"><div class="skill-num">05</div><div class="skill-icon">&#128737;</div><div class="skill-name">DevSecOps</div><div class="skill-pills"><span class="pill">SonarQube (SAST)</span><span class="pill">Trivy (Container)</span><span class="pill">WAF / OWASP</span><span class="pill">CIS Benchmarks</span><span class="pill">RBAC / Zero Trust</span></div></div>
+    <div class="skill-block reveal"><div class="skill-num">06</div><div class="skill-icon">&#128202;</div><div class="skill-name">Observability</div><div class="skill-pills"><span class="pill">Prometheus</span><span class="pill">Grafana</span><span class="pill">ELK Stack</span><span class="pill">Datadog</span><span class="pill">New Relic</span></div></div>
+    <div class="skill-block reveal"><div class="skill-num">07</div><div class="skill-icon">&#127760;</div><div class="skill-name">Networking</div><div class="skill-pills"><span class="pill">Azure VNet / AWS VPC</span><span class="pill">NGINX / HAProxy</span><span class="pill">Cloudflare CDN/WAF</span><span class="pill">VPN / Private Endpoints</span></div></div>
+    <div class="skill-block reveal"><div class="skill-num">08</div><div class="skill-icon">&#128187;</div><div class="skill-name">Scripting</div><div class="skill-pills"><span class="pill">Bash</span><span class="pill">Python</span><span class="pill">PowerShell</span><span class="pill">RHEL / Ubuntu</span></div></div>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="sec-label">Career</div>
+  <h2 class="sec-title">Work <span class="hi">Experience</span></h2>
+  <div class="sec-bar"></div>
+  <div class="exp-wrap reveal">
+    <div class="exp-nav">
+      <div class="exp-nav-item active" data-panel="0"><div class="exp-nav-company">SlashTec</div><div class="exp-nav-period">2023 &rarr; Present</div></div>
+      <div class="exp-nav-item" data-panel="1"><div class="exp-nav-company">Klayytech</div><div class="exp-nav-period">2022 &rarr; 2023</div></div>
+      <div class="exp-nav-item" data-panel="2"><div class="exp-nav-company">Ashtar</div><div class="exp-nav-period">2021 &rarr; 2022</div></div>
+      <div class="exp-nav-item" data-panel="3"><div class="exp-nav-company">Alumil Egypt</div><div class="exp-nav-period">2019 &rarr; 2020</div></div>
+    </div>
+    <div class="exp-content">
+      <div class="exp-panel active" id="panel-0">
+        <div class="exp-role-title">Senior DevOps Engineer</div>
+        <div class="exp-co-name">SlashTec</div>
+        <div class="exp-period-tag">December 2023 &mdash; Present</div>
+        <ul class="exp-list">
+          <li>Architected secure multi-cloud CI/CD pipelines across Azure DevOps, Jenkins, and GitLab CI/CD &mdash; cutting deployment cycle time by ~40% across 10+ concurrent enterprise projects.</li>
+          <li>Implemented production GitOps workflows using ArgoCD, eliminating configuration drift across all AKS/EKS clusters.</li>
+          <li>Engineered modular Terraform codebases cutting infrastructure provisioning from days to under 2 hours.</li>
+          <li>Integrated SonarQube (SAST) and Trivy into all CI pipelines &mdash; blocking 100% of critical vulnerabilities from reaching production.</li>
+          <li>Built centralized observability platform (Prometheus, Grafana, ELK, Datadog) reducing MTTD by ~60%.</li>
+          <li>Delivered cloud architecture for UAE government and GCC financial clients: DGE, ADGM, DMT, and QFCRA &mdash; zero-downtime deployments throughout.</li>
+        </ul>
+      </div>
+      <div class="exp-panel" id="panel-1">
+        <div class="exp-role-title">DevOps &amp; Cloud Architect</div>
+        <div class="exp-co-name">Klayytech</div>
+        <div class="exp-period-tag">January 2022 &mdash; December 2023</div>
+        <ul class="exp-list">
+          <li>Designed and delivered full Azure containerized infrastructure, migrating on-premises workloads with zero data loss.</li>
+          <li>Authored Terraform automation frameworks for end-to-end provisioning across Dev, Staging, and Production environments.</li>
+          <li>Designed enterprise IAM architecture using Azure Active Directory, OAuth 2.0, and OIDC &mdash; enforcing least-privilege across multi-tenant workloads.</li>
+          <li>Implemented HA load balancing using NGINX and HAProxy for production traffic exceeding 500k daily requests.</li>
+          <li>Reduced code defect escape rate by 35%+ through SonarQube quality gate integration.</li>
+        </ul>
+      </div>
+      <div class="exp-panel" id="panel-2">
+        <div class="exp-role-title">Senior IT Infrastructure Engineer</div>
+        <div class="exp-co-name">Ashtar</div>
+        <div class="exp-period-tag">January 2021 &mdash; January 2022</div>
+        <ul class="exp-list">
+          <li>Led Azure cloud adoption, migrating on-premises datacenter workloads via structured lift-and-shift strategy.</li>
+          <li>Reduced infrastructure configuration errors by 80% through Terraform automation replacing manual provisioning.</li>
+          <li>Administered RHEL, Ubuntu, and Windows Server environments for 200+ users across hybrid infrastructure.</li>
+          <li>Designed enterprise backup and DR strategy using Veeam, meeting defined RTO objectives for all critical workloads.</li>
+        </ul>
+      </div>
+      <div class="exp-panel" id="panel-3">
+        <div class="exp-role-title">System Engineer</div>
+        <div class="exp-co-name">Alumil Egypt</div>
+        <div class="exp-period-tag">September 2019 &mdash; January 2020</div>
+        <ul class="exp-list">
+          <li>Managed Windows and Linux server infrastructure alongside VMware virtualisation supporting 150+ end users.</li>
+          <li>Maintained enterprise network infrastructure including switching, routing, storage systems, and endpoint management.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="sec-label">Portfolio</div>
+  <h2 class="sec-title">Enterprise <span class="hi">Projects</span></h2>
+  <div class="sec-bar"></div>
+  <div class="projects-filter">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="gov">Government</button>
+    <button class="filter-btn" data-filter="fin">Financial</button>
+    <button class="filter-btn" data-filter="platform">Platform</button>
+    <button class="filter-btn" data-filter="ai">AI / Infra</button>
+  </div>
+  <div class="projects-masonry">
+    <div class="proj-card reveal" data-cat="gov"><div class="proj-corner"></div><span class="proj-cat cat-gov">UAE Gov</span><div class="proj-name">DGE</div><div class="proj-full">Digital Government Entity</div><p class="proj-desc">Hardened multi-environment Azure architecture with zero-trust segmentation. WAF v2 with OWASP policies, AKS + Azure AD RBAC, CIS Level 2 compliance. Full GitOps CI/CD with compliance audit trails.</p><div class="proj-stack"><span class="proj-tag">AKS</span><span class="proj-tag">Azure AD</span><span class="proj-tag">WAF v2</span><span class="proj-tag">Terraform</span><span class="proj-tag">ArgoCD</span><span class="proj-tag">CIS L2</span></div></div>
+    <div class="proj-card reveal" data-cat="fin"><div class="proj-corner"></div><span class="proj-cat cat-fin">Financial</span><div class="proj-name">ADGM</div><div class="proj-full">Abu Dhabi Global Market</div><p class="proj-desc">Multi-zone HA AKS at 99.99% SLA. GitOps promotion gates with under 5 min rollback. Full DevSecOps pipeline, centralized observability, ADGM regulatory compliance.</p><div class="proj-stack"><span class="proj-tag">AKS</span><span class="proj-tag">ArgoCD</span><span class="proj-tag">SonarQube</span><span class="proj-tag">Trivy</span><span class="proj-tag">Datadog</span></div></div>
+    <div class="proj-card reveal" data-cat="gov"><div class="proj-corner"></div><span class="proj-cat cat-gov">UAE Gov</span><div class="proj-name">DMT</div><div class="proj-full">Dept. of Municipalities &amp; Transport</div><p class="proj-desc">Full Azure migration with under 4 hours total downtime. Terraform modules cut provisioning by 70%. HA Kubernetes with RPO 1hr / RTO 4hr DR validated via quarterly failover drills.</p><div class="proj-stack"><span class="proj-tag">Terraform</span><span class="proj-tag">Kubernetes</span><span class="proj-tag">Azure</span><span class="proj-tag">DR Strategy</span></div></div>
+    <div class="proj-card reveal" data-cat="fin"><div class="proj-corner"></div><span class="proj-cat cat-fin">Financial</span><div class="proj-name">QFCRA</div><div class="proj-full">Qatar Financial Centre Regulatory Authority</div><p class="proj-desc">Secure three-tier Azure architecture. VNet peering, OAuth2/OIDC federated auth, hardened Kubernetes with Pod Security Policies for financial regulatory compliance.</p><div class="proj-stack"><span class="proj-tag">Azure</span><span class="proj-tag">VNet</span><span class="proj-tag">OAuth2</span><span class="proj-tag">OIDC</span><span class="proj-tag">Pod Security</span></div></div>
+    <div class="proj-card reveal" data-cat="gov"><div class="proj-corner"></div><span class="proj-cat cat-gov">Government</span><div class="proj-name">SAAED</div><div class="proj-full">National Traffic Management System</div><p class="proj-desc">Migration of mission-critical traffic systems to Azure with full operational continuity. Secure VNet segmentation, government VPN connectivity, 100% IaC coverage with Terraform.</p><div class="proj-stack"><span class="proj-tag">Azure</span><span class="proj-tag">VPN</span><span class="proj-tag">Terraform</span><span class="proj-tag">NGINX</span></div></div>
+    <div class="proj-card reveal" data-cat="fin"><div class="proj-corner"></div><span class="proj-cat cat-fin">Fintech</span><div class="proj-name">InstaPay</div><div class="proj-full">Egyptian Banks Payment Infrastructure</div><p class="proj-desc">Financial-grade infrastructure with strict IAM, network micro-segmentation, blue/green zero-downtime deployments, and PCI-DSS structured audit logging.</p><div class="proj-stack"><span class="proj-tag">IAM</span><span class="proj-tag">Blue/Green</span><span class="proj-tag">PCI-DSS</span><span class="proj-tag">Micro-seg</span></div></div>
+    <div class="proj-card reveal" data-cat="platform"><div class="proj-corner"></div><span class="proj-cat cat-platform">Platform</span><div class="proj-name">NSAK / 3omra</div><div class="proj-full">Hajj &amp; Umrah Pilgrimage Platform</div><p class="proj-desc">Kubernetes for 10x seasonal surges during Hajj. Elastic scale-out in under 3 minutes. mTLS payment gateways. Zero unplanned downtime across two consecutive peak seasons.</p><div class="proj-stack"><span class="proj-tag">Kubernetes</span><span class="proj-tag">HPA</span><span class="proj-tag">mTLS</span><span class="proj-tag">WAF</span></div></div>
+    <div class="proj-card reveal" data-cat="platform"><div class="proj-corner"></div><span class="proj-cat cat-platform">E-Commerce</span><div class="proj-name">Tamanna</div><div class="proj-full">AWS Cloud-Native Retail</div><p class="proj-desc">Cloud-native AWS for high-concurrency retail. RDS + Redis cut query latency 45%. Cloudflare WAF/CDN at 85%+ cache hit ratio with real-time DDoS mitigation.</p><div class="proj-stack"><span class="proj-tag">AWS</span><span class="proj-tag">RDS</span><span class="proj-tag">Redis</span><span class="proj-tag">Cloudflare</span></div></div>
+    <div class="proj-card reveal" data-cat="ai"><div class="proj-corner"></div><span class="proj-cat cat-ai">AI Infra</span><div class="proj-name">Ollama LLM</div><div class="proj-full">GPU-Enabled AI Inference Platform</div><p class="proj-desc">Hybrid infrastructure for LLM inference using NVIDIA Docker runtime. 35% throughput gain via GPU memory optimisation. Secured via reverse proxy with API auth and rate limiting.</p><div class="proj-stack"><span class="proj-tag">Ollama</span><span class="proj-tag">NVIDIA Docker</span><span class="proj-tag">GPU</span><span class="proj-tag">Auth</span></div></div>
+  </div>
+</section>
+
+<section id="certifications">
+  <div class="sec-label">Credentials</div>
+  <h2 class="sec-title">Certifi<span class="hi">cations</span></h2>
+  <div class="sec-bar"></div>
+  <div class="certs-track">
+    <div class="cert-tile reveal"><div class="cert-tile-num">01</div><div class="cert-tile-icon">&#9096;</div><div class="cert-tile-name">Certified Kubernetes Administrator (CKA)</div><div class="cert-tile-issuer">Cloud Native Computing Foundation</div><div class="cert-tile-bar"></div></div>
+    <div class="cert-tile reveal"><div class="cert-tile-num">02</div><div class="cert-tile-icon">&#9729;</div><div class="cert-tile-name">Azure Administrator Associate (AZ-104)</div><div class="cert-tile-issuer">Microsoft</div><div class="cert-tile-bar"></div></div>
+    <div class="cert-tile reveal"><div class="cert-tile-num">03</div><div class="cert-tile-icon">&#9728;</div><div class="cert-tile-name">AWS Solutions Architect &ndash; Associate</div><div class="cert-tile-issuer">Amazon Web Services</div><div class="cert-tile-bar"></div></div>
+    <div class="cert-tile reveal"><div class="cert-tile-num">04</div><div class="cert-tile-icon">&#128039;</div><div class="cert-tile-name">Linux Foundation Certified Sys Admin (LFCS)</div><div class="cert-tile-issuer">Linux Foundation</div><div class="cert-tile-bar"></div></div>
+    <div class="cert-tile reveal"><div class="cert-tile-num">05</div><div class="cert-tile-icon">&#128421;</div><div class="cert-tile-name">CCNA 200-301</div><div class="cert-tile-issuer">Cisco Systems</div><div class="cert-tile-bar"></div></div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="sec-label">Reach Out</div>
+  <h2 class="sec-title">Contact <span class="hi">Me</span></h2>
+  <div class="sec-bar"></div>
+  <div class="contact-grid">
+    <div class="reveal-left">
+      <div class="contact-headline">Let's build<br>something <span class="hi">great</span></div>
+      <p class="contact-sub">Open to Cloud Architect, DevOps Lead, and Platform Engineering roles in UAE, Qatar, Saudi Arabia, and wider GCC. Based in Egypt &mdash; ready to relocate immediately.</p>
+      <div class="contact-links">
+        <a href="tel:+201094975171" class="contact-link"><div class="cl-icon">&#128222;</div><div><div class="cl-label">Phone</div><div class="cl-value">+20 109 497 5171</div></div></a>
+        <a href="mailto:amrbadraa0161649688@gmail.com" class="contact-link"><div class="cl-icon">&#9993;</div><div><div class="cl-label">Email</div><div class="cl-value">amrbadraa0161649688@gmail.com</div></div></a>
+        <a href="https://www.linkedin.com/in/amr-badr-857a94315" target="_blank" class="contact-link"><div class="cl-icon">in</div><div><div class="cl-label">LinkedIn</div><div class="cl-value">linkedin.com/in/amr-badr-857a94315</div></div></a>
+        <div class="contact-link"><div class="cl-icon">&#128205;</div><div><div class="cl-label">Location</div><div class="cl-value">Egypt &mdash; Open to GCC Relocation</div></div></div>
+      </div>
+    </div>
+    <form class="contact-form reveal-right" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-field"><label>Name</label><input type="text" placeholder="Full name" required><div class="form-line"></div></div>
+        <div class="form-field"><label>Email</label><input type="email" placeholder="your@email.com" required><div class="form-line"></div></div>
+      </div>
+      <div class="form-field"><label>Company</label><input type="text" placeholder="Your organisation"><div class="form-line"></div></div>
+      <div class="form-field"><label>Message</label><textarea placeholder="Tell me about the role or project..." required></textarea><div class="form-line"></div></div>
+      <button type="submit" class="submit-btn" id="submitBtn">Send Message &rarr;</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">AMR BADR</div>
+  <div class="footer-mid"><span>SENIOR DEVOPS ENGINEER &amp; CLOUD SOLUTIONS ARCHITECT</span></div>
+  <div class="footer-right"><span>&copy; 2025 &middot; Egypt / GCC</span></div>
+</footer>
+
+<script>
+(function(){
+  var canvas=document.getElementById('gl');
+  var gl=canvas.getContext('webgl');
+  if(!gl)return;
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;gl.viewport(0,0,canvas.width,canvas.height);}
+  resize();window.addEventListener('resize',resize);
+  var vs='attribute vec2 pos;void main(){gl_Position=vec4(pos,0.0,1.0);}';
+  var fs='precision mediump float;uniform float time;uniform vec2 res;uniform vec2 mouse;float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);float a=h(i),b=h(i+vec2(1,0)),c=h(i+vec2(0,1)),d=h(i+vec2(1,1));return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.0;a*=0.5;}return v;}void main(){vec2 uv=(gl_FragCoord.xy-res*0.5)/res.y;vec2 m=(mouse-res*0.5)/res.y;float t=time*0.18;vec2 q=vec2(fbm(uv+t),fbm(uv+vec2(1.7,9.2)+t*0.8));vec2 r=vec2(fbm(uv+2.0*q+vec2(1.7,9.2)+t*0.5),fbm(uv+2.0*q+vec2(8.3,2.8)+t*0.6));float d=distance(uv,m);r+=smoothstep(0.6,0.0,d)*0.28;float f=fbm(uv+2.0*r);vec3 a=vec3(0.01,0.04,0.12),b=vec3(0.02,0.05,0.14),c=vec3(0.0,0.09,0.28),dd=vec3(0.0,0.12,0.42);vec3 col=a+b*cos(6.28318*(c*f+dd));col*=1.0+0.4*fbm(uv*3.0+t);col=pow(col,vec3(1.1));gl_FragColor=vec4(col,1.0);}';
+  function mkS(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  var prog=gl.createProgram();
+  gl.attachShader(prog,mkS(gl.VERTEX_SHADER,vs));
+  gl.attachShader(prog,mkS(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var posL=gl.getAttribLocation(prog,'pos');gl.enableVertexAttribArray(posL);gl.vertexAttribPointer(posL,2,gl.FLOAT,false,0,0);
+  var uT=gl.getUniformLocation(prog,'time'),uR=gl.getUniformLocation(prog,'res'),uM=gl.getUniformLocation(prog,'mouse');
+  var mx=0,my=0;window.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;});
+  function render(t){gl.uniform1f(uT,t*.001);gl.uniform2f(uR,canvas.width,canvas.height);gl.uniform2f(uM,mx,canvas.height-my);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(render);}
+  requestAnimationFrame(render);
+})();
+
+var dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+var mx2=0,my2=0,rx=0,ry=0;
+document.addEventListener('mousemove',function(e){mx2=e.clientX;my2=e.clientY;dot.style.left=mx2+'px';dot.style.top=my2+'px';});
+(function lr(){rx+=(mx2-rx)*.1;ry+=(my2-ry)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(lr);})();
+document.querySelectorAll('a,button,.exp-nav-item,.proj-card,.cert-tile,.skill-block').forEach(function(el){
+  el.addEventListener('mouseenter',function(){ring.classList.add('hover');});
+  el.addEventListener('mouseleave',function(){ring.classList.remove('hover');});
+});
+
+var pbar=document.getElementById('progress');
+window.addEventListener('scroll',function(){pbar.style.width=(window.scrollY/(document.body.scrollHeight-window.innerHeight)*100)+'%';});
+
+var nav=document.getElementById('nav');
+window.addEventListener('scroll',function(){nav.classList.toggle('scrolled',window.scrollY>50);});
+
+var termLines=[
+  {cmd:'./init --role "Senior DevOps Engineer"',out:'OK  Role loaded -- 6+ years experience'},
+  {cmd:'kubectl get nodes --all-namespaces',out:'OK  AKS/EKS clusters: READY'},
+  {cmd:'terraform plan -target=az_gcc_prod',out:'OK  12 enterprise projects deployed'},
+  {cmd:'cat certifications.yaml | grep valid',out:'OK  CKA | AZ-104 | AWS-SAA | LFCS | CCNA'},
+];
+var li=0,ci=0,phase='cmd';
+var typedEl=document.getElementById('typed'),outEl=document.getElementById('term-output');
+function typeLoop(){
+  var line=termLines[li%termLines.length];
+  if(phase==='cmd'){
+    if(ci<line.cmd.length){typedEl.textContent+=line.cmd[ci++];setTimeout(typeLoop,40+Math.random()*30);}
+    else{phase='wait';setTimeout(typeLoop,500);}
+  }else if(phase==='wait'){
+    outEl.innerHTML='<span style="color:var(--gold);">'+line.out+'</span>';
+    phase='pause';setTimeout(typeLoop,2400);
+  }else{
+    typedEl.textContent='';outEl.innerHTML='';phase='cmd';ci=0;li++;setTimeout(typeLoop,250);
+  }
+}
+setTimeout(typeLoop,1500);
+
+var counted=false;
+function animateCounters(){
+  document.querySelectorAll('[data-count]').forEach(function(el){
+    var target=parseInt(el.dataset.count),suffix=el.dataset.suffix||'+';
+    var cur=0,step=target/50;
+    var t=setInterval(function(){cur=Math.min(cur+step,target);el.textContent=Math.floor(cur)+(cur>=target?suffix:'');if(cur>=target)clearInterval(t);},28);
+  });
+}
+var heroObs=new IntersectionObserver(function(e){if(e[0].isIntersecting&&!counted){counted=true;animateCounters();}},{threshold:.5});
+var m=document.querySelector('.hero-metrics');if(m)heroObs.observe(m);
+
+var revObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e,i){if(e.isIntersecting){setTimeout(function(){e.target.classList.add('vis');},i*70);revObs.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(function(el){revObs.observe(el);});
+
+document.querySelectorAll('.exp-nav-item').forEach(function(item){
+  item.addEventListener('click',function(){
+    document.querySelectorAll('.exp-nav-item').forEach(function(i){i.classList.remove('active');});
+    document.querySelectorAll('.exp-panel').forEach(function(p){p.classList.remove('active');});
+    item.classList.add('active');
+    document.getElementById('panel-'+item.dataset.panel).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.filter-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    var f=btn.dataset.filter;
+    document.querySelectorAll('.proj-card').forEach(function(card){
+      card.classList.toggle('hidden',f!=='all'&&card.dataset.cat!==f);
+    });
+  });
+});
+
+document.querySelectorAll('.proj-card').forEach(function(card){
+  card.addEventListener('mousemove',function(e){
+    var r=card.getBoundingClientRect();
+    card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+    card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+
+document.querySelectorAll('.mag-btn,.nav-btn').forEach(function(btn){
+  btn.addEventListener('mousemove',function(e){
+    var r=btn.getBoundingClientRect();
+    btn.style.transform='translate('+((e.clientX-r.left-r.width/2)*.22)+'px,'+((e.clientY-r.top-r.height/2)*.22)+'px)';
+  });
+  btn.addEventListener('mouseleave',function(){btn.style.transform='';});
+});
+
+function handleSubmit(e){
+  e.preventDefault();
+  var btn=document.getElementById('submitBtn');
+  btn.textContent='Sending...';
+  setTimeout(function(){btn.textContent='Sent!';btn.classList.add('sent');e.target.reset();setTimeout(function(){btn.textContent='Send Message';btn.classList.remove('sent');},4000);},1200);
+}
+</script>
+</body>
+</html>
